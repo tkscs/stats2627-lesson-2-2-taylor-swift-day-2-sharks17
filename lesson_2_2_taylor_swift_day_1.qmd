@@ -1,0 +1,180 @@
+---
+title: "lesson_2_2_taylor_swift_day_1"
+format: html
+---
+
+```{r}
+library(tidyverse)
+```
+
+## Step 1: Here's data for the whole population
+
+```{r}
+enjoyment_matrix =
+  matrix(
+    data = c(92, 89, 90, 88, 95, 100, 98, 93, 95, 84,
+             82, 86, 90, 88, 86, 91, 90, 89, 85, 83,
+             80, 74, 80, 67, 81, 82, 76, 77, 74, 65,
+             72, 68, 74, 73, 70, 69, 72, 70, 68, 67,
+             69, 67, 68, 68, 64, 66, 63, 63, 70, 68),
+    nrow = 5,
+    byrow = TRUE,
+    dimnames = list("row" = 1:5, "column" = 1:10)
+  )
+enjoyment_matrix
+```
+
+It's nice to put the data in "long form" where each column is a variable.
+
+```{r}
+enjoyment_data =
+  enjoyment_matrix |> 
+  as_tibble() |>
+  mutate(row = 1:5) |> 
+  pivot_longer(!row, names_to = "column", values_to = "enjoyment") |> 
+  mutate(column = as.integer(column))
+enjoyment_data
+```
+
+## Step 2: Here are the 3 randomized sampling methods
+
+### Method #1: Simple Random Sample (SRS)
+
+First get your 10 people with a simple random sampling method:
+
+```{r}
+simple_random_sample =
+  enjoyment_data |>
+  sample_n(10)
+simple_random_sample
+```
+
+Then calculate the average enjoyment for that sample:
+
+```{r}
+simple_random_sample |> 
+  pull(enjoyment) |> 
+  mean()
+```
+
+Then package everything into a function that we can run many times. (Nothing will print out yet, we will use this later)
+
+```{r}
+run_SRS = function(i) {
+  simple_random_sample =
+    enjoyment_data |> 
+    sample_n(10)
+  simple_random_sample |> 
+    pull(enjoyment) |> 
+    mean()
+}
+```
+
+### Method #2: Stratified random sample by row
+
+First get your 10 people a stratified sampling method, 2 for each row:
+
+```{r}
+stratified_sample_by_row =
+  enjoyment_data |>
+  group_by(row) |> 
+  sample_n(2)
+stratified_sample_by_row
+```
+
+Then calculate the average enjoyment for that sample:
+
+```{r}
+stratified_sample_by_row |> 
+  ## YOUR CODE HERE (see Method #1 for an example)
+```
+
+Then package everything into a function that we can run many times. (Nothing will print out yet, we will use this later)
+
+```{r}
+run_stratified_by_row = function(i) {
+  stratified_sample_by_row =
+    enjoyment_data |>
+    group_by(row) |> 
+    sample_n(2)
+  stratified_sample_by_row |> 
+    ## YOUR CODE HERE (copy-paste from above)
+}
+```
+
+### Method #3: Stratified random sample by column
+
+First get your 10 people with a stratified sampling methods, 1 for each column:
+
+```{r}
+stratified_sample_by_col =
+  enjoyment_data |>
+  ## YOUR CODE HERE (see Method #2 for an example)
+stratified_sample_by_col
+```
+
+Then calculate the average enjoyment for that sample:
+
+```{r}
+stratified_sample_by_col |> 
+  ## YOUR CODE HERE (see Method #1 for an example)
+```
+
+Then package everything into a function that we can run many times. (Nothing will print out yet, we will use this later)
+
+```{r}
+run_stratified_by_col = function(i) {
+  stratified_sample_by_col =
+    enjoyment_data |>
+    ## YOUR CODE HERE (copy-paste from above)
+  stratified_sample_by_col |> 
+    ## YOUR CODE HERE (copy-paste from above)
+}
+```
+
+## Step 3: Run the experiments
+
+```{r}
+n_experiments = 100
+srs_means = map_dbl(1:n_experiments, run_SRS)
+stratified_by_row_means = map_dbl(1:n_experiments, run_stratified_by_row)
+stratified_by_col_means = map_dbl(1:n_experiments, run_stratified_by_col)
+"first 10:"
+srs_means[1:10]
+stratified_by_row_means[1:10]
+stratified_by_col_means[1:10]
+```
+
+## Step 4: Calculate the true average
+
+To check each method for bias, calculate the true average enjoyment for everyone at the concert.
+
+```{r}
+true_average = enjoyment_data |> 
+  pull(enjoyment) |> 
+  mean()
+true_average
+```
+
+## Step 4: Graph the results of the experiments
+
+The red vertical line represents the true average enjoyment.
+
+```{r, message=FALSE}
+experiment_results =
+  tibble(
+  "Simple random sample" = srs_means,
+  "Stratified by row" = stratified_by_row_means,
+  "Stratified by column" = stratified_by_col_means
+) |> 
+  pivot_longer(everything(), names_to = "method", values_to = "average_enjoyment")
+
+experiment_results |> 
+  ggplot(aes(x = average_enjoyment, fill = method)) +
+  geom_histogram(binwidth = 1) +
+  geom_vline(xintercept = true_average, colour = "red") +
+  facet_wrap(vars(method), ncol = 1) +
+  theme(legend.position = "none")
+```
+
+Go back to the worksheet now!!
