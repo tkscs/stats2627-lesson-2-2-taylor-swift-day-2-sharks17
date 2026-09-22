@@ -1,0 +1,12 @@
+schema: "classroom50/repo-config/v1"
+classroom: "stats2627"
+assignment: "lesson-2-2-taylor-swift-day-2"
+owner:
+  username: "sharks17"
+  id: 315861099
+  accepted_at: "2026-09-22T16:58:10Z"
+source:
+  owner: "tkscs"
+  owner_id: 215133286
+  repo: "lesson_2_2_taylor_swift_day_1"
+  branch: "main"
